@@ -32,7 +32,7 @@ df['mes_nome'] = df['mes'].map(meses_nome)
 st.sidebar.title("Filtros")
 ano = st.sidebar.selectbox("Ano", ["Todos"] + sorted(df['ano'].dropna().unique().tolist()))
 mes = st.sidebar.selectbox("Mês", ["Todos"] + list(meses_nome.values()))
-municípios = st.sidebar.multiselect("Municípios", sorted(df['município'].dropna().unique()), default=None)
+municípios = st.sidebar.multiselect("Município", sorted(df['município'].dropna().unique()), default=None)
 tipo_solo = st.sidebar.multiselect("Tipo de Solo", sorted(df['tipo de solo'].dropna().unique()), default=None)
 
 if ano != "Todos":
@@ -40,8 +40,8 @@ if ano != "Todos":
 if mes != "Todos":
     mes_num = {v: k for k, v in meses_nome.items()}[mes]
     df = df[df['mes'] == mes_num]
-if municípios:
-    df = df[df['município'].isin(municípios)]
+if município:
+    df = df[df['município'].isin(município)]
 if tipo_solo:
     df = df[df['tipo de solo'].isin(tipo_solo)]
 
