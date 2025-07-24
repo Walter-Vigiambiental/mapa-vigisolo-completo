@@ -33,27 +33,30 @@ ano_selecionado = st.sidebar.selectbox("Ano", options=["Todos"] + anos, index=0)
 meses_numeros = sorted([int(m) for m in df['mes'].dropna().unique() if 1 <= int(m) <= 12])
 meses_nome = {num: calendar.month_abbr[num].capitalize() for num in meses_numeros}
 mes_nome_opcoes = ["Todos"] + list(meses_nome.values())
+mes_nome_selecionado = st.sidebar.selectbox("Mês", options=mes_nome_opcoes, index=0)
 
 bairros_disponiveis = sorted(df['bairro'].dropna().unique())
 bairro_selecionado = st.sidebar.multiselect("Bairro", options=bairros_disponiveis)
 
 # Aplicar filtros
+df_filtrado = df.copy()
+
 if ano_selecionado != "Todos":
-    df = df[df['ano'] == ano_selecionado]
+    df_filtrado = df_filtrado[df_filtrado['ano'] == ano_selecionado]
 
 if mes_nome_selecionado != "Todos":
     mes_num = list(meses_nome.keys())[list(meses_nome.values()).index(mes_nome_selecionado)]
-    df = df[df['mes'] == mes_num]
+    df_filtrado = df_filtrado[df_filtrado['mes'] == mes_num]
 
 if bairro_selecionado:
-    df = df[df['bairro'].isin(bairro_selecionado)]
+    df_filtrado = df_filtrado[df_filtrado['bairro'].isin(bairro_selecionado)]
 
 # Criar mapa
-if not df.empty:
-    m = folium.Map(location=[df['latitude'].mean(), df['longitude'].mean()], zoom_start=10)
+if not df_filtrado.empty:
+    m = folium.Map(location=[df_filtrado['latitude'].mean(), df_filtrado['longitude'].mean()], zoom_start=10)
     marker_cluster = MarkerCluster().add_to(m)
 
-    for _, row in df.iterrows():
+    for _, row in df_filtrado.iterrows():
         popup = f"""
         <b>Bairro:</b> {row['bairro']}<br>
         <b>Data:</b> {row['data'].date()}<br>
