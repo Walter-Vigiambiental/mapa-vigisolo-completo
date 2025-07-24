@@ -5,14 +5,11 @@ from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 import calendar
 
-# Título do app
 st.set_page_config(page_title="Mapa VIGISOLO", layout="wide")
 st.title("📍 Mapa Interativo do VIGISOLO")
 
-# URL da planilha no Google Sheets (formato CSV público)
 URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
 
-# Carregar dados
 @st.cache_data(ttl=600)
 def carregar_dados():
     df = pd.read_csv(URL)
@@ -20,11 +17,15 @@ def carregar_dados():
     df['data'] = pd.to_datetime(df['data'], dayfirst=True, errors='coerce')
     df['ano'] = df['data'].dt.year
     df['mes'] = df['data'].dt.month
+    
+    # Converter latitude e longitude para numérico (float), erros viram NaN
+    df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce')
+    df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce')
+    
     return df
 
 df = carregar_dados()
 
-# Filtros na barra lateral
 st.sidebar.header("Filtros")
 
 anos = sorted(df['ano'].dropna().unique())
@@ -38,7 +39,6 @@ mes_nome_selecionado = st.sidebar.selectbox("Mês", options=mes_nome_opcoes, ind
 bairros_disponiveis = sorted(df['bairro'].dropna().unique())
 bairro_selecionado = st.sidebar.multiselect("Bairro", options=bairros_disponiveis)
 
-# Aplicar filtros
 df_filtrado = df.copy()
 
 if ano_selecionado != "Todos":
@@ -51,7 +51,9 @@ if mes_nome_selecionado != "Todos":
 if bairro_selecionado:
     df_filtrado = df_filtrado[df_filtrado['bairro'].isin(bairro_selecionado)]
 
-# Criar mapa
+# Remover linhas sem latitude ou longitude válidos
+df_filtrado = df_filtrado.dropna(subset=['latitude', 'longitude'])
+
 if not df_filtrado.empty:
     m = folium.Map(location=[df_filtrado['latitude'].mean(), df_filtrado['longitude'].mean()], zoom_start=10)
     marker_cluster = MarkerCluster().add_to(m)
