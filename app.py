@@ -30,10 +30,9 @@ st.sidebar.header("Filtros")
 anos = sorted(df['ano'].dropna().unique())
 ano_selecionado = st.sidebar.selectbox("Ano", options=["Todos"] + anos, index=0)
 
-meses_numeros = sorted(df['mes'].dropna().unique())
-meses_nome = {num: calendar.month_abbr[int(num)].capitalize() for num in meses_numeros}
-mes_nome_opcoes = ["Todos"] + [meses_nome[num] for num in meses_numeros]
-mes_nome_selecionado = st.sidebar.selectbox("Mês", mes_nome_opcoes)
+meses_numeros = sorted([int(m) for m in df['mes'].dropna().unique() if 1 <= int(m) <= 12])
+meses_nome = {num: calendar.month_abbr[num].capitalize() for num in meses_numeros}
+mes_nome_opcoes = ["Todos"] + list(meses_nome.values())
 
 bairros_disponiveis = sorted(df['bairro'].dropna().unique())
 bairro_selecionado = st.sidebar.multiselect("Bairro", options=bairros_disponiveis)
