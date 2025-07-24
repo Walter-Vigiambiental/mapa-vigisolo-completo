@@ -18,7 +18,6 @@ def carregar_dados():
     df['ano'] = df['data'].dt.year
     df['mes'] = df['data'].dt.month
     
-    # Converter latitude e longitude para numérico (float), erros viram NaN
     df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce')
     df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce')
     
@@ -39,6 +38,13 @@ mes_nome_selecionado = st.sidebar.selectbox("Mês", options=mes_nome_opcoes, ind
 bairros_disponiveis = sorted(df['bairro'].dropna().unique())
 bairro_selecionado = st.sidebar.multiselect("Bairro", options=bairros_disponiveis)
 
+# Diagnóstico - Mostrar dados e opções disponíveis
+st.sidebar.write("Anos disponíveis:", anos)
+st.sidebar.write("Meses disponíveis:", meses_nome)
+st.sidebar.write("Bairros disponíveis:", bairros_disponiveis)
+
+st.write(f"Total de dados originais: {len(df)}")
+
 df_filtrado = df.copy()
 
 if ano_selecionado != "Todos":
@@ -51,8 +57,10 @@ if mes_nome_selecionado != "Todos":
 if bairro_selecionado:
     df_filtrado = df_filtrado[df_filtrado['bairro'].isin(bairro_selecionado)]
 
-# Remover linhas sem latitude ou longitude válidos
+# Remove dados sem latitude/longitude válidos
 df_filtrado = df_filtrado.dropna(subset=['latitude', 'longitude'])
+
+st.write(f"Total de dados após filtro: {len(df_filtrado)}")
 
 if not df_filtrado.empty:
     m = folium.Map(location=[df_filtrado['latitude'].mean(), df_filtrado['longitude'].mean()], zoom_start=10)
